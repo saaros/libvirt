@@ -25,10 +25,12 @@
 # define __VIR_NETDEV_VETH_H__
 
 # include "internal.h"
+# include "virmacaddr.h"
 
 /* Function declarations */
-int virNetDevVethCreate(char **veth1, char **veth2)
-    ATTRIBUTE_NONNULL(1) ATTRIBUTE_NONNULL(2) ATTRIBUTE_RETURN_CHECK;
+int virNetDevVethCreate(char **veth1, char **veth2, const virMacAddrPtr mac)
+    ATTRIBUTE_NONNULL(1) ATTRIBUTE_NONNULL(2) ATTRIBUTE_NONNULL(3)
+    ATTRIBUTE_RETURN_CHECK;
 int virNetDevVethDelete(const char *veth)
     ATTRIBUTE_NONNULL(1) ATTRIBUTE_RETURN_CHECK;
 

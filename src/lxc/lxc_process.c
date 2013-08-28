@@ -243,7 +243,7 @@ char *virLXCProcessSetupInterfaceBridged(virConnectPtr conn,
 
     VIR_DEBUG("calling vethCreate()");
     parentVeth = net->ifname;
-    if (virNetDevVethCreate(&parentVeth, &containerVeth) < 0)
+    if (virNetDevVethCreate(&parentVeth, &containerVeth, &net->mac) < 0)
         goto cleanup;
     VIR_DEBUG("parentVeth: %s, containerVeth: %s", parentVeth, containerVeth);
 

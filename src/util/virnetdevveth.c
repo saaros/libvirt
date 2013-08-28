@@ -38,96 +38,46 @@
 
 /* Functions */
 /**
- * virNetDevVethGetFreeName:
- * @veth: pointer to store returned name for veth device
- * @startDev: device number to start at (x in vethx)
- *
- * Looks in /sys/class/net/ to find the first available veth device
- * name.
- *
- * Returns non-negative device number on success or -1 in case of error
- */
-static int virNetDevVethGetFreeName(char **veth, int startDev)
-{
-    int devNum = startDev-1;
-    char *path = NULL;
-
-    VIR_DEBUG("Find free from veth%d", startDev);
-    do {
-        VIR_FREE(path);
-        ++devNum;
-        if (virAsprintf(&path, "/sys/class/net/veth%d/", devNum) < 0)
-            return -1;
-        VIR_DEBUG("Probe %s", path);
-    } while (virFileExists(path));
-    VIR_FREE(path);
-
-    if (virAsprintf(veth, "veth%d", devNum) < 0)
-        return -1;
-
-    return devNum;
-}
-
-/**
  * virNetDevVethCreate:
  * @veth1: pointer to name for parent end of veth pair
  * @veth2: pointer to return name for container end of veth pair
+ * @mac: mac address of the device
  *
  * Creates a veth device pair using the ip command:
  * ip link add veth1 type veth peer name veth2
- * If veth1 points to NULL on entry, it will be a valid interface on
- * return.  veth2 should point to NULL on entry.
  *
- * NOTE: If veth1 and veth2 names are not specified, ip will auto assign
- *       names.  There seems to be two problems here -
- *       1) There doesn't seem to be a way to determine the names of the
- *          devices that it creates.  They show up in ip link show and
- *          under /sys/class/net/ however there is no guarantee that they
- *          are the devices that this process just created.
- *       2) Once one of the veth devices is moved to another namespace, it
- *          is no longer visible in the parent namespace.  This seems to
- *          confuse the name assignment causing it to fail with File exists.
- *       Because of these issues, this function currently allocates names
- *       prior to using the ip command, and returns any allocated names
- *       to the caller.
+ * If veth1 or veth2 points to NULL on entry, they will be a valid interface
+ * on return.  The name is generated based on the mac address given.
  *
  * Returns 0 on success or -1 in case of error
  */
-int virNetDevVethCreate(char** veth1, char** veth2)
+int virNetDevVethCreate(char** veth1, char** veth2, const virMacAddrPtr mac)
 {
-    int rc = -1;
     const char *argv[] = {
         "ip", "link", "add", NULL, "type", "veth", "peer", "name", NULL, NULL
     };
-    int vethDev = 0;
     bool veth1_alloc = false;
     bool veth2_alloc = false;
 
     VIR_DEBUG("Host: %s guest: %s", NULLSTR(*veth1), NULLSTR(*veth2));
 
     if (*veth1 == NULL) {
-        if ((vethDev = virNetDevVethGetFreeName(veth1, vethDev)) < 0)
-            goto cleanup;
+        /* Use the last three bytes of the mac address as our if name */
+        if (virAsprintf(veth1, "veth%02x%02x%02x",
+                        mac->addr[3], mac->addr[4], mac->addr[5]) < 0)
+            return -1;
         VIR_DEBUG("Assigned host: %s", *veth1);
         veth1_alloc = true;
-        vethDev++;
     }
     argv[3] = *veth1;
 
-    while (*veth2 == NULL) {
-        if ((vethDev = virNetDevVethGetFreeName(veth2, vethDev)) < 0) {
+    if (*veth2 == NULL) {
+        /* Append a 'p' to veth1 if name */
+        if (virAsprintf(veth2, "%sp", *veth1) < 0) {
             if (veth1_alloc)
                 VIR_FREE(*veth1);
-            goto cleanup;
+            return -1;
         }
-
-        /* Just make sure they didn't accidentally get same name */
-        if (STREQ(*veth1, *veth2)) {
-            vethDev++;
-            VIR_FREE(*veth2);
-            continue;
-        }
-
         VIR_DEBUG("Assigned guest: %s", *veth2);
         veth2_alloc = true;
     }
@@ -139,13 +89,10 @@ int virNetDevVethCreate(char** veth1, char** veth2)
             VIR_FREE(*veth1);
         if (veth2_alloc)
             VIR_FREE(*veth2);
-        goto cleanup;
+        return -1;
     }
 
-    rc = 0;
-
-cleanup:
-    return rc;
+    return 0;
 }
 
 /**
