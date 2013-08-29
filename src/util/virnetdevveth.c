@@ -114,18 +114,12 @@ int virNetDevVethCreate(char** veth1, char** veth2)
     }
     argv[3] = *veth1;
 
-    while (*veth2 == NULL) {
-        if ((vethDev = virNetDevVethGetFreeName(veth2, vethDev)) < 0) {
+    if (*veth2 == NULL) {
+        /* Append a 'p' to veth1 if name */
+        if (virAsprintf(veth2, "%sp", *veth1) < 0) {
             if (veth1_alloc)
                 VIR_FREE(*veth1);
             goto cleanup;
-        }
-
-        /* Just make sure they didn't accidentally get same name */
-        if (STREQ(*veth1, *veth2)) {
-            vethDev++;
-            VIR_FREE(*veth2);
-            continue;
         }
 
         VIR_DEBUG("Assigned guest: %s", *veth2);
