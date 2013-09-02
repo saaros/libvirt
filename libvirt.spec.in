@@ -730,6 +730,8 @@ Requires: device-mapper
 Requires: device-mapper
     %endif
     %if %{with_storage_sheepdog}
+# For Btrfs storage
+Requires: btrfs-progs
 # For Sheepdog support
 Requires: sheepdog
     %endif

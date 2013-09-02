@@ -128,6 +128,7 @@ enum virStoragePoolType {
     VIR_STORAGE_POOL_MPATH,    /* Multipath devices */
     VIR_STORAGE_POOL_RBD,      /* RADOS Block Device */
     VIR_STORAGE_POOL_SHEEPDOG, /* Sheepdog device */
+    VIR_STORAGE_POOL_BTRFS,    /* btrfs subvolumes / snapshots */
 
     VIR_STORAGE_POOL_LAST,
 };

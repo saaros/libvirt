@@ -1562,6 +1562,8 @@ AC_ARG_WITH([storage-rbd],
   AC_HELP_STRING([--with-storage-rbd], [with RADOS Block Device backend for the storage driver @<:@default=check@:>@]),[],[with_storage_rbd=check])
 AC_ARG_WITH([storage-sheepdog],
   AC_HELP_STRING([--with-storage-sheepdog], [with Sheepdog backend for the storage driver @<:@default=check@:>@]),[],[with_storage_sheepdog=check])
+AC_ARG_WITH([storage-btrfs],
+  AC_HELP_STRING([--with-storage-btrfs], [with Btrfs backend for the storage driver @<:@default=check@:>@]),[],[with_storage_btrfs=check])
 
 if test "$with_libvirtd" = "no"; then
   with_storage_dir=no
@@ -1774,6 +1776,24 @@ fi
 AM_CONDITIONAL([WITH_STORAGE_SHEEPDOG],
   [test "$with_storage_sheepdog" = "yes"])
 
+if test "$with_storage_btrfs" = "yes" || test "$with_storage_btrfs" = "check"; then
+  AC_PATH_PROG([BTRFS], [btrfs], [], [$PATH:/sbin:/usr/sbin])
+
+  if test "$with_storage_btrfs" = "yes" ; then
+    if test -z "$BTRFS" ; then AC_MSG_ERROR([We need btrfs -command for btrfs storage driver]) ; fi
+  else
+    if test -z "$BTRFS" ; then with_storage_btrfs=no ; fi
+    if test "$with_storage_btrfs" = "check" ; then with_storage_btrfs=yes ; fi
+  fi
+
+  if test "$with_storage_btrfs" = "yes" ; then
+    AC_DEFINE_UNQUOTED([WITH_STORAGE_BTRFS], 1, [whether Btrfs backend for storage driver is enabled])
+    AC_DEFINE_UNQUOTED([BTRFS],["$BTRFS"],[Location of btrfs program])
+  fi
+fi
+AM_CONDITIONAL([WITH_STORAGE_BTRFS], [test "$with_storage_btrfs" = "yes"])
+
+
 
 LIBPARTED_CFLAGS=
 LIBPARTED_LIBS=
@@ -1861,7 +1881,7 @@ AC_SUBST([DEVMAPPER_CFLAGS])
 AC_SUBST([DEVMAPPER_LIBS])
 
 with_storage=no
-for backend in dir fs lvm iscsi scsi mpath rbd disk; do
+for backend in dir fs lvm iscsi scsi mpath rbd disk btrfs; do
     if eval test \$with_storage_$backend = yes; then
         with_storage=yes
         break
@@ -2573,6 +2593,7 @@ AC_MSG_NOTICE([   mpath: $with_storage_mpath])
 AC_MSG_NOTICE([    Disk: $with_storage_disk])
 AC_MSG_NOTICE([     RBD: $with_storage_rbd])
 AC_MSG_NOTICE([Sheepdog: $with_storage_sheepdog])
+AC_MSG_NOTICE([   Btrfs: $with_storage_btrfs])
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([Security Drivers])
 AC_MSG_NOTICE([])

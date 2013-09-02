@@ -1,0 +1,17 @@
+<pool type='btrfs'>
+  <name>lxc</name>
+  <uuid>96a73758-5481-4e79-b557-e130b81adf4c</uuid>
+  <capacity unit='bytes'>0</capacity>
+  <allocation unit='bytes'>0</allocation>
+  <available unit='bytes'>0</available>
+  <source>
+  </source>
+  <target>
+    <path>/lxc</path>
+    <permissions>
+      <mode>0755</mode>
+      <owner>-1</owner>
+      <group>-1</group>
+    </permissions>
+  </target>
+</pool>

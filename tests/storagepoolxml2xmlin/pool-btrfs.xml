@@ -1,0 +1,7 @@
+<pool type='btrfs'>
+  <name>lxc</name>
+  <uuid>96a73758-5481-4e79-b557-e130b81adf4c</uuid>
+  <target>
+    <path>/lxc</path>
+  </target>
+</pool>

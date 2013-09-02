@@ -21,6 +21,7 @@
         <ref name='poolmpath'/>
         <ref name='poolrbd'/>
         <ref name='poolsheepdog'/>
+        <ref name='poolbtrfs'/>
       </choice>
     </element>
   </define>
@@ -123,6 +124,16 @@
     <ref name='commonmetadata'/>
     <ref name='sizing'/>
     <ref name='sourcesheepdog'/>
+  </define>
+
+  <define name='poolbtrfs'>
+    <attribute name='type'>
+      <value>btrfs</value>
+    </attribute>
+    <ref name='commonmetadata'/>
+    <ref name='sizing'/>
+    <ref name='sourcedir'/>
+    <ref name='target'/>
   </define>
 
   <define name='sourceinfovendor'>

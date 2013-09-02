@@ -789,6 +789,9 @@ STORAGE_DRIVER_RBD_SOURCES =					\
 STORAGE_DRIVER_SHEEPDOG_SOURCES =				\
 		storage/storage_backend_sheepdog.h storage/storage_backend_sheepdog.c
 
+STORAGE_DRIVER_BTRFS_SOURCES =				\
+		storage/storage_backend_btrfs.h storage/storage_backend_btrfs.c
+
 STORAGE_HELPER_DISK_SOURCES =					\
 		storage/parthelper.c
 
@@ -1402,6 +1405,10 @@ if WITH_STORAGE_SHEEPDOG
 libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_SHEEPDOG_SOURCES)
 endif
 
+if WITH_STORAGE_BTRFS
+libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_BTRFS_SOURCES)
+endif
+
 if WITH_NODE_DEVICES
 # Needed to keep automake quiet about conditionals
 if WITH_DRIVER_MODULES
@@ -1594,6 +1601,7 @@ EXTRA_DIST +=							\
 		$(STORAGE_DRIVER_DISK_SOURCES)			\
 		$(STORAGE_DRIVER_RBD_SOURCES)			\
 		$(STORAGE_DRIVER_SHEEPDOG_SOURCES)		\
+		$(STORAGE_DRIVER_BTRFS_SOURCES)			\
 		$(NODE_DEVICE_DRIVER_SOURCES)			\
 		$(NODE_DEVICE_DRIVER_HAL_SOURCES)		\
 		$(NODE_DEVICE_DRIVER_UDEV_SOURCES)		\
