@@ -1178,6 +1178,7 @@ virFileExists;
 virFileFclose;
 virFileFdopen;
 virFileFindMountPoint;
+virFileFsType;
 virFileHasSuffix;
 virFileIsAbsPath;
 virFileIsDir;

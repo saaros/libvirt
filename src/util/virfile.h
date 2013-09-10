@@ -221,6 +221,7 @@ int virFileOpenTty(int *ttymaster,
                    int rawmode);
 
 char *virFileFindMountPoint(const char *type);
+char *virFileFsType(const char *path);
 
 void virFileWaitForDevices(void);
 

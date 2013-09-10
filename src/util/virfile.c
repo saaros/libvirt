@@ -1135,10 +1135,57 @@ cleanup:
     return ret;
 }
 
+/* search /proc/mounts for the filesystem type of the given path;
+ * return pointer to malloc'ed string of type if found, otherwise
+ * return NULL.
+ */
+char *
+virFileFsType(const char *path)
+{
+    FILE *f;
+    struct mntent mb;
+    char mntbuf[1024];
+    char *real = NULL, *ret = NULL;
+    size_t lookup_len, longest = 0;
+
+    if ((real = realpath(path, NULL)) == NULL)
+        return NULL;
+    lookup_len = strlen(real);
+
+    f = setmntent("/proc/mounts", "r");
+    if (!f) {
+        VIR_FREE(real);
+        return NULL;
+    }
+
+    while (getmntent_r(f, &mb, mntbuf, sizeof(mntbuf))) {
+        size_t mnt_dir_len = strlen(mb.mnt_dir);
+        if (lookup_len >= mnt_dir_len && mnt_dir_len >= longest) {
+            if (memcmp(mb.mnt_dir, real, mnt_dir_len) == 0) {
+                longest = mnt_dir_len;
+                VIR_FREE(ret);
+                ignore_value(VIR_STRDUP_QUIET(ret, mb.mnt_type));
+            }
+        }
+    }
+    endmntent(f);
+    VIR_FREE(real);
+
+    return ret;
+}
+
 #else /* defined HAVE_MNTENT_H && defined HAVE_GETMNTENT_R */
 
 char *
 virFileFindMountPoint(const char *type ATTRIBUTE_UNUSED)
+{
+    errno = ENOSYS;
+
+    return NULL;
+}
+
+char *
+virFileFsType(const char *path)
 {
     errno = ENOSYS;
 
