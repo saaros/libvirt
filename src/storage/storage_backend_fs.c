@@ -51,6 +51,7 @@
 #include "virfile.h"
 #include "virlog.h"
 #include "virstring.h"
+#include "dirname.h"
 
 #define VIR_FROM_THIS VIR_FROM_STORAGE
 
@@ -801,6 +802,33 @@ error:
 }
 
 
+#if WITH_STORAGE_BTRFS
+static int
+btrfsVolInfo(virStoragePoolObjPtr pool ATTRIBUTE_UNUSED,
+             char **groups,
+             void *data)
+{
+    virStorageVolDefPtr vol = data;
+
+    if (STREQ(groups[0], "uuid")) {
+        vol->type = VIR_STORAGE_VOL_DIR;
+        vol->target.format = VIR_STORAGE_FILE_VOLUME;
+        VIR_FREE(vol->target.uuid);
+        if (VIR_STRDUP(vol->target.uuid, groups[1]) < 0)
+            return -1;
+    } else if (STREQ(groups[0], "Parent uuid") && STRNEQ(groups[1], "-")) {
+        vol->backingStore.format = VIR_STORAGE_FILE_VOLUME;
+        VIR_FREE(vol->backingStore.path);
+        vol->backingStore.path = NULL;
+        VIR_FREE(vol->backingStore.uuid);
+        if (VIR_STRDUP(vol->backingStore.uuid, groups[1]) < 0)
+            return -1;
+    }
+
+    return 0;
+}
+#endif
+
 /**
  * Iterate over the pool's directory and enumerate all disk images
  * within it. This is non-recursive.
@@ -809,10 +837,17 @@ static int
 virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
                                    virStoragePoolObjPtr pool)
 {
-    DIR *dir;
+    int ret = -1;
+    DIR *dir = NULL;
     struct dirent *ent;
     struct statvfs sb;
     virStorageVolDefPtr vol = NULL;
+#if WITH_STORAGE_BTRFS
+    int missing_subvolume_info = 0;
+    char *fstype = NULL;
+
+    fstype = virFileFsType(pool->def->target.path);
+#endif
 
     if (!(dir = opendir(pool->def->target.path))) {
         virReportSystemError(errno,
@@ -822,7 +857,7 @@ virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
     }
 
     while ((ent = readdir(dir)) != NULL) {
-        int ret;
+        int probe;
         char *backingStore;
         int backingStoreFormat;
 
@@ -842,19 +877,19 @@ virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
         if (VIR_STRDUP(vol->key, vol->target.path) < 0)
             goto cleanup;
 
-        if ((ret = virStorageBackendProbeTarget(&vol->target,
-                                                &backingStore,
-                                                &backingStoreFormat,
-                                                &vol->allocation,
-                                                &vol->capacity,
-                                                &vol->target.encryption)) < 0) {
-            if (ret == -2) {
+        if ((probe = virStorageBackendProbeTarget(&vol->target,
+                                                  &backingStore,
+                                                  &backingStoreFormat,
+                                                  &vol->allocation,
+                                                  &vol->capacity,
+                                                  &vol->target.encryption)) < 0) {
+            if (probe == -2) {
                 /* Silently ignore non-regular files,
                  * eg '.' '..', 'lost+found', dangling symbolic link */
                 virStorageVolDefFree(vol);
                 vol = NULL;
                 continue;
-            } else if (ret == -3) {
+            } else if (probe == -3) {
                 /* The backing file is currently unavailable, its format is not
                  * explicitly specified, the probe to auto detect the format
                  * failed: continue with faked RAW format, since AUTO will
@@ -864,6 +899,23 @@ virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
             } else
                 goto cleanup;
         }
+
+#if WITH_STORAGE_BTRFS
+        /* check for subvolumes */
+        if (vol->target.format == VIR_STORAGE_FILE_DIR &&
+            fstype != NULL && STREQ(fstype, "btrfs")) {
+            int vars[] = {2};
+            const char *regexes[] = {"^\\s*([A-Za-z ]+):\\s*(.+)\\s*$"};
+            virCommandPtr cmd = virCommandNewArgList(
+                "btrfs", "subvolume", "show", vol->target.path, NULL);
+            if (cmd == NULL)
+                goto cleanup;
+            virStorageBackendRunProgRegex(NULL, cmd, 1, regexes, vars,
+                                          btrfsVolInfo, vol, NULL);
+            if (vol->backingStore.format == VIR_STORAGE_FILE_VOLUME)
+                missing_subvolume_info ++;
+        }
+#endif
 
         /* directory based volume */
         if (vol->target.format == VIR_STORAGE_FILE_DIR)
@@ -896,13 +948,44 @@ virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
         vol = NULL;
     }
     closedir(dir);
+    dir = NULL;
 
+#if WITH_STORAGE_BTRFS
+    if (missing_subvolume_info) {
+        /* update snapshot information */
+        virStorageVolDefPtr volv, volb;
+        int idxv, idxb;
+
+        for (idxv = 0; idxv < pool->volumes.count; idxv ++) {
+            volv = pool->volumes.objs[idxv];
+            if (volv->backingStore.format == VIR_STORAGE_FILE_VOLUME &&
+                volv->backingStore.uuid != NULL) {
+                for (idxb = 0; idxb < pool->volumes.count; idxb ++) {
+                    volb = pool->volumes.objs[idxb];
+                    if (volb->target.format == VIR_STORAGE_FILE_VOLUME &&
+                        volb->target.uuid != NULL &&
+                        STREQ(volb->target.uuid, volv->backingStore.uuid)) {
+                        if (VIR_STRDUP(volv->backingStore.path, volb->target.path) < 0)
+                            goto cleanup;
+                        break;
+                    }
+                }
+                if (volv->backingStore.path == NULL) {
+                    /* backing store not in the pool, ignore it */
+                    VIR_FREE(volv->backingStore.uuid);
+                    volv->backingStore.uuid = NULL;
+                    volv->backingStore.format = VIR_STORAGE_FILE_NONE;
+                }
+            }
+        }
+    }
+#endif
 
     if (statvfs(pool->def->target.path, &sb) < 0) {
         virReportSystemError(errno,
                              _("cannot statvfs path '%s'"),
                              pool->def->target.path);
-        return -1;
+        goto cleanup;
     }
     pool->def->capacity = ((unsigned long long)sb.f_frsize *
                            (unsigned long long)sb.f_blocks);
@@ -910,14 +993,19 @@ virStorageBackendFileSystemRefresh(virConnectPtr conn ATTRIBUTE_UNUSED,
                             (unsigned long long)sb.f_frsize);
     pool->def->allocation = pool->def->capacity - pool->def->available;
 
-    return 0;
+    ret = 0;
 
- cleanup:
+cleanup:
+#if WITH_STORAGE_BTRFS
+    VIR_FREE(fstype);
+#endif
     if (dir)
         closedir(dir);
     virStorageVolDefFree(vol);
-    virStoragePoolObjClearVols(pool);
-    return -1;
+    if (ret < 0)
+        virStoragePoolObjClearVols(pool);
+
+    return ret;
 }
 
 
@@ -1000,8 +1088,88 @@ virStorageBackendFileSystemVolCreate(virConnectPtr conn ATTRIBUTE_UNUSED,
         return -1;
     }
 
+    if (vol->target.format == VIR_STORAGE_FILE_VOLUME) {
+        vol->type = VIR_STORAGE_VOL_DIR;
+        if (vol->backingStore.path != NULL)
+            vol->backingStore.format = VIR_STORAGE_FILE_VOLUME;
+    }
+
     VIR_FREE(vol->key);
     return VIR_STRDUP(vol->key, vol->target.path);
+}
+
+static int createVolumeDir(virConnectPtr conn ATTRIBUTE_UNUSED,
+                           virStoragePoolObjPtr pool ATTRIBUTE_UNUSED,
+                           virStorageVolDefPtr vol,
+                           virStorageVolDefPtr inputvol,
+                           unsigned int flags)
+{
+    int ret = -1;
+    char *vol_dir_name = NULL;
+    char *fstype = NULL;
+    virCommandPtr cmd = NULL;
+    struct stat st;
+
+    virCheckFlags(0, -1);
+
+    if (inputvol) {
+        virReportError(VIR_ERR_INTERNAL_ERROR, "%s",
+                _("cannot copy from volume to a subvolume"));
+        return -1;
+    }
+
+    if ((vol_dir_name = mdir_name(vol->target.path)) == NULL)
+        goto cleanup;
+
+    fstype = virFileFsType(vol_dir_name);
+    if (fstype == NULL) {
+        virReportSystemError(errno,
+                             _("cannot get filesystem type for %s"),
+                             vol->target.path);
+        goto cleanup;
+    }
+#if WITH_STORAGE_BTRFS
+    else if (STREQ(fstype, "btrfs")) {
+        cmd = virCommandNew("btrfs");
+        if (!cmd)
+            goto cleanup;
+
+        if (vol->backingStore.path == NULL) {
+            virCommandAddArgList(cmd, "subvolume", "create", vol->target.path, NULL);
+        } else {
+            if (!virFileIsDir(vol->backingStore.path)) {
+                virReportError(VIR_ERR_OPERATION_INVALID,
+                               _("backing store %s is not a directory"),
+                               vol->backingStore.path);
+                goto cleanup;
+            }
+
+            virCommandAddArgList(cmd, "subvolume", "snapshot", vol->backingStore.path,
+                                 vol->target.path, NULL);
+        }
+        if (virCommandRun(cmd, NULL) < 0)
+            goto cleanup;
+    }
+#endif
+    else {
+        virReportError(VIR_ERR_CONFIG_UNSUPPORTED,
+                       _("subvolumes are not supported in %s"),
+                       fstype);
+        goto cleanup;
+    }
+
+    if (stat(vol->target.path, &st) < 0) {
+        virReportSystemError(errno,
+                             _("failed to create %s"), vol->target.path);
+        goto cleanup;
+    }
+    ret = 0;
+
+cleanup:
+    VIR_FREE(vol_dir_name);
+    VIR_FREE(fstype);
+    virCommandFree(cmd);
+    return ret;
 }
 
 static int createFileDir(virConnectPtr conn ATTRIBUTE_UNUSED,
@@ -1061,6 +1229,8 @@ _virStorageBackendFileSystemVolBuild(virConnectPtr conn,
         create_func = virStorageBackendCreateRaw;
     } else if (vol->target.format == VIR_STORAGE_FILE_DIR) {
         create_func = createFileDir;
+    } else if (vol->target.format == VIR_STORAGE_FILE_VOLUME) {
+        create_func = createVolumeDir;
     } else if ((tool_type = virStorageBackendFindFSImageTool(NULL)) != -1) {
         create_func = virStorageBackendFSImageToolTypeToFunc(tool_type);
 
@@ -1133,6 +1303,23 @@ virStorageBackendFileSystemVolDelete(virConnectPtr conn ATTRIBUTE_UNUSED,
         }
         break;
     case VIR_STORAGE_VOL_DIR:
+#if WITH_STORAGE_BTRFS
+        if (vol->target.format == VIR_STORAGE_FILE_VOLUME) {
+            char *fstype = virFileFsType(vol->target.path);
+            if (fstype != NULL && STREQ(fstype, "btrfs")) {
+                virCommandPtr cmd = NULL;
+                int ret;
+
+                cmd = virCommandNewArgList("btrfs", "subvolume", "delete",
+                                           vol->target.path, NULL);
+                ret = (virCommandRun(cmd, NULL) < 0) ? -1 : 0;
+                virCommandFree(cmd);
+                VIR_FREE(fstype);
+                return ret;
+            }
+            VIR_FREE(fstype);
+        }
+#endif
         if (rmdir(vol->target.path) < 0) {
             virReportSystemError(errno,
                                  _("cannot remove directory '%s'"),

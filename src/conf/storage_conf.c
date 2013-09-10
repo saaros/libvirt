@@ -314,11 +314,14 @@ virStorageVolDefFree(virStorageVolDefPtr def)
     VIR_FREE(def->source.extents);
 
     VIR_FREE(def->target.compat);
+    VIR_FREE(def->target.uuid);
     virBitmapFree(def->target.features);
     VIR_FREE(def->target.path);
     VIR_FREE(def->target.perms.label);
     VIR_FREE(def->target.timestamps);
     virStorageEncryptionFree(def->target.encryption);
+    VIR_FREE(def->backingStore.compat);
+    VIR_FREE(def->backingStore.uuid);
     VIR_FREE(def->backingStore.path);
     VIR_FREE(def->backingStore.perms.label);
     VIR_FREE(def->backingStore.timestamps);

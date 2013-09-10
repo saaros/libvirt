@@ -90,6 +90,7 @@ struct _virStorageVolTarget {
     virStorageEncryptionPtr encryption;
     virBitmapPtr features;
     char *compat;
+    char *uuid;
 };
 
 typedef struct _virStorageVolDef virStorageVolDef;

@@ -57,7 +57,7 @@ VIR_ENUM_IMPL(virStorageFileFormat,
               "raw", "dir", "bochs",
               "cloop", "cow", "dmg", "iso",
               "qcow", "qcow2", "qed", "vmdk", "vpc",
-              "fat", "vhd", "vdi")
+              "fat", "vhd", "vdi", "volume")
 
 VIR_ENUM_IMPL(virStorageFileFeature,
               VIR_STORAGE_FILE_FEATURE_LAST,
@@ -232,6 +232,8 @@ static struct FileTypeInfo const fileTypeInfo[] = {
                                -1, {0}, 0, 0, 0, 0, NULL, NULL },
     [VIR_STORAGE_FILE_VHD] = { 0, NULL, NULL, LV_LITTLE_ENDIAN,
                                -1, {0}, 0, 0, 0, 0, NULL, NULL },
+    [VIR_STORAGE_FILE_VOLUME] = { 0, NULL, NULL, LV_LITTLE_ENDIAN,
+                                  -1, {0}, 0, 0, 0, 0, NULL, NULL },
 };
 verify(ARRAY_CARDINALITY(fileTypeInfo) == VIR_STORAGE_FILE_LAST);
 

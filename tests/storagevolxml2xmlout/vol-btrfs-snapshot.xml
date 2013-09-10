@@ -1,0 +1,26 @@
+<volume>
+  <name>clone</name>
+  <key>(null)</key>
+  <source>
+  </source>
+  <capacity unit='bytes'>0</capacity>
+  <allocation unit='bytes'>0</allocation>
+  <target>
+    <path>/lxc/clone</path>
+    <format type='volume'/>
+    <permissions>
+      <mode>0600</mode>
+      <owner>4294967295</owner>
+      <group>4294967295</group>
+    </permissions>
+  </target>
+  <backingStore>
+    <path>/lxc/vanilla</path>
+    <format type='volume'/>
+    <permissions>
+      <mode>0600</mode>
+      <owner>4294967295</owner>
+      <group>4294967295</group>
+    </permissions>
+  </backingStore>
+</volume>

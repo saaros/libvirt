@@ -1,0 +1,13 @@
+<volume>
+  <name>clone</name>
+  <capacity unit="bytes">0</capacity>
+  <allocation unit="bytes">0</allocation>
+  <target>
+    <path>/lxc/clone</path>
+    <format type='volume'/>
+  </target>
+  <backingStore>
+    <path>/lxc/vanilla</path>
+    <format type='volume'/>
+  </backingStore>
+</volume>

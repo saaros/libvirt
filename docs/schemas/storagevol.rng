@@ -201,6 +201,7 @@
       <value>qed</value>
       <value>vmdk</value>
       <value>vpc</value>
+      <value>volume</value>
     </choice>
   </define>
 

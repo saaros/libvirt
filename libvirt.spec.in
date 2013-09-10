@@ -517,6 +517,8 @@ BuildRequires: PolicyKit-devel >= 0.6
 %if %{with_storage_fs}
 # For mount/umount in FS driver
 BuildRequires: util-linux
+# For btrfs
+BuildRequires: btrfs-progs
 %endif
 %if %{with_qemu}
 # From QEMU RPMs
@@ -730,6 +732,8 @@ Requires: device-mapper
 Requires: device-mapper
     %endif
     %if %{with_storage_sheepdog}
+# For Btrfs storage
+Requires: btrfs-progs
 # For Sheepdog support
 Requires: sheepdog
     %endif

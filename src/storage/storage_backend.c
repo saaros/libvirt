@@ -1269,13 +1269,16 @@ virStorageBackendUpdateVolInfoFlags(virStorageVolDefPtr vol,
                                     openflags)) < 0)
         return ret;
 
-    if (vol->backingStore.path &&
-        (ret = virStorageBackendUpdateVolTargetInfo(&vol->backingStore,
-                                            NULL, NULL,
-                                            VIR_STORAGE_VOL_OPEN_DEFAULT)) < 0)
-        return ret;
+    if (vol->backingStore.path) {
+        int flags = VIR_STORAGE_VOL_OPEN_DEFAULT;
 
-    return 0;
+        if (vol->backingStore.format == VIR_STORAGE_FILE_VOLUME)
+            flags |= VIR_STORAGE_VOL_OPEN_DIR;
+        ret = virStorageBackendUpdateVolTargetInfo(&vol->backingStore,
+                                                   NULL, NULL, flags);
+    }
+
+    return ret;
 }
 
 int virStorageBackendUpdateVolInfo(virStorageVolDefPtr vol,
