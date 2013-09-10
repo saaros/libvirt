@@ -21240,7 +21240,7 @@ msgstr "மெட்டா தரவின் எண்ணிக்கை அத
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s'ல் முடியாத மெட்டாதரவு"
 
 #: src/test/test_driver.c:2064

@@ -20860,7 +20860,7 @@ msgstr "lengte van metadata buiten de reeks"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "onvolledige metadata in '%s'"
 
 #: src/test/test_driver.c:2064

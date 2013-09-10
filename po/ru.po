@@ -20835,7 +20835,7 @@ msgstr "длина метаданных выходит за пределы ди�
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "незавершенные метаданные в «%s»"
 
 #: src/test/test_driver.c:2064

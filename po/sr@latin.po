@@ -20683,7 +20683,7 @@ msgstr "dužina meta podatka je van opsega"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr ""
 
 #: src/test/test_driver.c:2064

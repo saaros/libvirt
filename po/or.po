@@ -20663,7 +20663,7 @@ msgstr "ଅଧିତଥ୍ୟ ଲମ୍ବର ସୀମା ବାହାରେ"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' ରେ ଅସମ୍ପୂର୍ଣ୍ଣ ଅଧିତଥ୍ୟ"
 
 #: src/test/test_driver.c:2064

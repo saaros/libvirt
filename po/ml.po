@@ -21159,7 +21159,7 @@ msgstr "മെറ്റാഡേറ്റായുടെ വ്യാപ്ത�
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s'-ല്‍ പൂര്‍ത്തിയാകാത്ത മെറ്റഡേറ്റാ"
 
 #: src/test/test_driver.c:2064

@@ -21030,7 +21030,7 @@ msgstr "মেটাডাতাৰ দৈৰ্ঘ্য সীমাৰ বা
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' ত মিটাডাটা অসম্পূৰ্ণ"
 
 #: src/test/test_driver.c:2064

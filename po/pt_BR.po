@@ -21529,7 +21529,7 @@ msgstr "comprimento dos meta dados fora do intervalo"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "meta dados incompletos em \"%s\""
 
 #: src/test/test_driver.c:2064

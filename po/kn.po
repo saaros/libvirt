@@ -20910,7 +20910,7 @@ msgstr "ಮೆಟಾಡಾಟಾದ ಗಾತ್ರವು ವ್ಯಾಪ್ತ�
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' ನಲ್ಲಿ ಅಪೂರ್ಣವಾದ ಮೆಟಾಡಾಟಾ"
 
 #: src/test/test_driver.c:2064

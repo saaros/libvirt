@@ -21042,7 +21042,7 @@ msgstr "długość metadanych jest spoza zakresu"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "niepełne metadane w \"%s\""
 
 #: src/test/test_driver.c:2064

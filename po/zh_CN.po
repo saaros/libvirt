@@ -20697,7 +20697,7 @@ msgstr "元数据长度超出范围"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' 中不完整的元数据"
 
 #: src/test/test_driver.c:2064
@@ -24508,7 +24508,7 @@ msgstr "指定未知驱动程序路径 '%s'  (尝试：vbox:///session)"
 #: src/vbox/vbox_driver.c:182 src/vbox/vbox_tmpl.c:1034
 #, c-format
 msgid "unknown driver path '%s' specified (try vbox:///system)"
-msgstr "指定未知驱动程序路径 '%s'  (尝试：vbox:///systme)"
+msgstr "指定未知驱动程序路径 '%s'  (尝试：vbox:///system)"
 
 #: src/vbox/vbox_driver.c:188
 msgid "unable to initialize VirtualBox driver API"

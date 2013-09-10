@@ -20945,7 +20945,7 @@ msgstr "સીમા ની બહાર મેટાડેટા ની લં�
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' માં અપૂરતુ મેટાડેટા"
 
 #: src/test/test_driver.c:2064

@@ -20819,7 +20819,7 @@ msgstr "lunghezza dei metadata fuori dalla gamma"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "metadata incompleti in '%s'"
 
 #: src/test/test_driver.c:2064

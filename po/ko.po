@@ -20701,7 +20701,7 @@ msgstr "메타데이터 길이가 범위를 벗어남"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s'안에 완전하지 않은 메타데이터"
 
 #: src/test/test_driver.c:2064

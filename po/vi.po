@@ -20833,7 +20833,7 @@ msgstr "độ dài dữ liệu meta vượt miền"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "dữ liệu meta không hoàn thiện trong '%s'"
 
 #: src/test/test_driver.c:2064

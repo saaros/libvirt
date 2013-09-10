@@ -21894,7 +21894,7 @@ msgstr "довжина метаданих не належить діапазон
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "неповні метадані у «%s»"
 
 #: src/test/test_driver.c:2064

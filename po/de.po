@@ -16933,7 +16933,7 @@ msgstr "getunnelte Offline-Migration ist nicht sinnvoll"
 
 #: src/qemu/qemu_migration.c:2109 src/qemu/qemu_migration.c:2407
 msgid "domain disappeared"
-msgstr "Doamin ist verschwunden"
+msgstr "Domain ist verschwunden"
 
 #: src/qemu/qemu_migration.c:2321 src/qemu/qemu_migration.c:3400
 msgid "cannot create pipe for tunnelled migration"
@@ -21623,7 +21623,7 @@ msgstr "Metadaten-Länge außerhalb des Bereichs"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "Unvollständige Metadaten in '%s'"
 
 #: src/test/test_driver.c:2064

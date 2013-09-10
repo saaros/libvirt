@@ -21449,7 +21449,7 @@ msgstr "メタデータの長さは範囲外です"
 
 #: src/test/test_driver.c:1992
 #, c-format
-msgid "incomplete metdata in '%s'"
+msgid "incomplete metadata in '%s'"
 msgstr "'%s' にあるメタ情報が不完全です"
 
 #: src/test/test_driver.c:2064
